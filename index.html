@@ -147,6 +147,7 @@ const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjunior";
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
+const PERM_VAL = 32503680000000; // ค่าคงที่สำหรับตรวจสอบรหัสถาวร
 
 function getDeviceId() { let id = localStorage.getItem('lekwin_dev_id'); if (!id) { id = 'ID-' + Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('lekwin_dev_id', id); } return id; }
 const MY_DEVICE_ID = getDeviceId();
@@ -164,9 +165,17 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
 
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
-    if(!expireAt) { statusEl.innerHTML = "♾️ รหัสถาวร"; return; }
+    
+    // ตรวจสอบว่าเป็นรหัสถาวรหรือไม่ (ถ้าไม่มี expireAt หรือค่า expireAt สูงกว่าปกติ)
+    if(!expireAt || expireAt >= PERM_VAL) { 
+        statusEl.innerHTML = "♾️ถาวร♾️"; 
+        statusEl.classList.remove("expiry-urgent");
+        return; 
+    }
+    
     const diff = expireAt - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    
     if(days <= 0) {
         statusEl.innerHTML = "❌ หมดอายุแล้ว";
         statusEl.classList.add("expiry-urgent");
@@ -193,8 +202,13 @@ async function doLogin() {
         const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
         if(customSnap.exists()) {
             const data = customSnap.val();
-            if(Date.now() > data.expireAt) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
-            isValidUser = true; expireAt = data.expireAt;
+            // ถ้ารหัสเป็นถาวร ข้ามการเช็คหมดอายุ
+            if(data.expireAt < PERM_VAL && Date.now() > data.expireAt) { 
+                alert("❌ รหัสหมดอายุแล้ว!"); 
+                return; 
+            }
+            isValidUser = true; 
+            expireAt = data.expireAt;
         }
     }
 
@@ -263,7 +277,7 @@ window.onload = () => {
             if(snap.exists()){
                 const data = snap.val();
                 showRemainingDays(data.expireAt);
-                if(Date.now() > data.expireAt) {
+                if(data.expireAt < PERM_VAL && Date.now() > data.expireAt) {
                     document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
                     document.getElementById("kickAlert").style.display = "flex";
                 }
