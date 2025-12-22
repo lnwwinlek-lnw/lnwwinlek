@@ -164,9 +164,10 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
 
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
+    const PERM_THRESHOLD = 30000000000000; // ค่าที่แอดมินใช้ตั้งถาวร (32,xxx,xxx,xxx,xxx)
     
-    // ตรวจสอบว่าแอดมินกดถาวรให้หรือไม่ (ปกติวันจะสูงมาก เช่น มากกว่าปี 2099)
-    if(!expireAt || expireAt > 4000000000000) { 
+    // ✅ ตรวจสอบว่าเป็นรหัสถาวรหรือไม่
+    if(!expireAt || expireAt >= PERM_THRESHOLD) { 
         statusEl.innerHTML = "♾️ถาวร♾️"; 
         statusEl.classList.remove("expiry-urgent");
         return; 
@@ -201,7 +202,8 @@ async function doLogin() {
         const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
         if(customSnap.exists()) {
             const data = customSnap.val();
-            if(Date.now() > data.expireAt && data.expireAt < 4000000000000) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
+            // เช็คหมดอายุ (ยกเว้นถาวร)
+            if(Date.now() > data.expireAt && data.expireAt < 30000000000000) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
             isValidUser = true; expireAt = data.expireAt;
         }
     }
@@ -271,7 +273,8 @@ window.onload = () => {
             if(snap.exists()){
                 const data = snap.val();
                 showRemainingDays(data.expireAt);
-                if(Date.now() > data.expireAt && data.expireAt < 4000000000000) {
+                // เช็คดีดออกถ้าหมดอายุ (ยกเว้นถาวร)
+                if(Date.now() > data.expireAt && data.expireAt < 30000000000000) {
                     document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
                     document.getElementById("kickAlert").style.display = "flex";
                 }
