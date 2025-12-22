@@ -15,20 +15,10 @@ body { display: flex; flex-direction: column; align-items: center; padding: 15px
 header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0; text-transform: lowercase; }
 header p { font-size: 0.85rem; font-weight: 600; color: #666; margin: 5px 0 10px 0; }
 
-/* แสดงรหัสผ่านมุมขวาบน */
 .user-badge {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    color: #4aa3ff;
-    border: 1px solid rgba(74, 163, 255, 0.3);
-    backdrop-filter: blur(4px);
-    z-index: 100;
+    position: fixed; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.7);
+    padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;
+    color: #4aa3ff; border: 1px solid rgba(74, 163, 255, 0.3); backdrop-filter: blur(4px); z-index: 100;
 }
 
 /* แถบแจ้งวันใช้งานคงเหลือ */
@@ -36,6 +26,10 @@ header p { font-size: 0.85rem; font-weight: 600; color: #666; margin: 5px 0 10px
     background: #fff; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
     color: #1565c0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 10px 0; display: inline-block; border: 1px solid #bbdefb;
 }
+/* สไตล์พิเศษสำหรับรหัสถาวร */
+.perm-active { color: #7b1fa2; border-color: #ce93d8; background: #f3e5f5; animation: glow 1s infinite alternate; }
+@keyframes glow { from { box-shadow: 0 0 5px #ce93d8; } to { box-shadow: 0 0 15px #ce93d8; } }
+
 .expiry-urgent { color: #ff5252; border-color: #ff5252; animation: blink 1.5s infinite; }
 @keyframes blink { 50% { opacity: 0.7; } }
 
@@ -46,7 +40,6 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 .reset { background: #ff6b6b; color: white; width: 100%; padding: 10px; font-size: 0.9rem; }
 #logoutBtn { background: #90a4ae; color: white; padding: 6px 15px; font-size: 0.75rem; margin-bottom: 10px; }
 
-/* โซนแสดงผล */
 .result-section { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
 .section { background: #fff; border-radius: 12px; padding: 0.8rem; text-align: center; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
 .section:active { transform: scale(0.95); }
@@ -54,7 +47,6 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 .section strong { display: block; margin-bottom: 5px; color: #ff7ab6; font-size: 0.75rem; border-bottom: 1px solid #fdf2f8; padding-bottom: 4px; }
 .result { font-family: 'Consolas', monospace; font-size: 0.85rem; color: #444; line-height: 1.4; word-break: break-all; }
 
-/* Overlay ต่างๆ */
 #kickAlert, #banOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
 .alert-box { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; text-align: center; width: 100%; max-width: 300px; border: 5px solid #ff7ab6; }
 
@@ -147,6 +139,7 @@ const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjunior";
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
+const PERM_VAL = 32503680000000; // ค่าถาวร
 
 function getDeviceId() { let id = localStorage.getItem('lekwin_dev_id'); if (!id) { id = 'ID-' + Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('lekwin_dev_id', id); } return id; }
 const MY_DEVICE_ID = getDeviceId();
@@ -162,11 +155,22 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
     }
 });
 
+// ฟังก์ชันแสดงวันคงเหลือ (ปรับปรุงใหม่เพื่อแสดง ♾️ ถาวร ♾️)
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
-    if(!expireAt) { statusEl.innerHTML = "♾️ รหัสถาวร"; return; }
+    
+    // ถ้าไม่มีค่าวันหมดอายุ (รหัสแอดมิน) หรือ ค่าเท่ากับค่าถาวร
+    if(!expireAt || expireAt >= PERM_VAL) { 
+        statusEl.innerHTML = "♾️ ถาวร ♾️"; 
+        statusEl.classList.add("perm-active");
+        statusEl.classList.remove("expiry-urgent");
+        return; 
+    }
+
     const diff = expireAt - Date.now();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    
+    statusEl.classList.remove("perm-active");
     if(days <= 0) {
         statusEl.innerHTML = "❌ หมดอายุแล้ว";
         statusEl.classList.add("expiry-urgent");
@@ -193,7 +197,8 @@ async function doLogin() {
         const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
         if(customSnap.exists()) {
             const data = customSnap.val();
-            if(Date.now() > data.expireAt) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
+            // เช็คหมดอายุ (ถ้าไม่ใช่รหัสถาวร)
+            if(data.expireAt < PERM_VAL && Date.now() > data.expireAt) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
             isValidUser = true; expireAt = data.expireAt;
         }
     }
@@ -226,7 +231,6 @@ window.onload = () => {
         document.getElementById("loginOverlay").style.display = "none";
         document.getElementById("main").style.display = "block";
         
-        // แสดงรหัสผ่านที่มุมขวาบน
         const badge = document.getElementById("currentUserBadge");
         badge.innerText = "🔑 " + myPass;
         badge.style.display = "block";
@@ -242,9 +246,7 @@ window.onload = () => {
         document.addEventListener("visibilitychange", () => {
             setOnlineStatus(document.visibilityState === 'visible');
         });
-        window.addEventListener("beforeunload", () => {
-            setOnlineStatus(false);
-        });
+        
         db.ref('online_users/' + myPass).onDisconnect().update({ status: "offline" });
 
         if(sessionStorage.getItem("isAdmin") === "1") {
@@ -259,15 +261,20 @@ window.onload = () => {
             });
         } else { document.getElementById("userPanel").style.display = "block"; }
 
+        // ดึงข้อมูลวันหมดอายุจาก Firebase
         db.ref('custom_codes/' + myPass).on('value', (snap) => {
             if(snap.exists()){
                 const data = snap.val();
                 showRemainingDays(data.expireAt);
-                if(Date.now() > data.expireAt) {
+                // แจ้งเตือนถ้าหมดอายุ (สำหรับรหัสทั่วไป)
+                if(data.expireAt < PERM_VAL && Date.now() > data.expireAt) {
                     document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
                     document.getElementById("kickAlert").style.display = "flex";
                 }
-            } else if(USER_CODES.includes(myPass)) { showRemainingDays(null); }
+            } else if(USER_CODES.includes(myPass)) { 
+                // ถ้ารหัสอยู่ใน List เริ่มต้น ให้ถือเป็นถาวร
+                showRemainingDays(PERM_VAL); 
+            }
         });
 
         db.ref('online_users/' + myPass).on('value', (snap) => {
