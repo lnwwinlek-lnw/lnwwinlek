@@ -1,284 +1,309 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ADMIN MONITOR - LEKWIN JUNIOR</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<meta charset="UTF-8">
+<title>lnwwinlek - 🌟เทพวินเลข🌟</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <style>
-        :root {
-            --primary-blue: #1565c0;
-            --pastel-blue: #e3f2fd;
-            --accent-pink: #ff4081;
-            --success-green: #00e676;
-            --soft-purple: #f3e5f5;
-        }
+<style>
+/* CSS พื้นฐาน */
+html, body { margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; background: linear-gradient(160deg, #ffe4f0, #d0f0ff); background-attachment: fixed; }
+body { display: flex; flex-direction: column; align-items: center; padding: 15px 0; }
+.container { text-align: center; max-width: 400px; width: 92%; }
+header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0; text-transform: lowercase; }
+header p { font-size: 0.85rem; font-weight: 600; color: #666; margin: 5px 0 10px 0; }
 
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); }
-        body { display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
-        
-        .container { width: 100%; max-width: 750px; }
-        
-        .logo-header { text-align: center; margin-bottom: 20px; }
-        .logo-header img { 
-            width: 100px; height: 100px; border-radius: 20px; 
-            object-fit: cover; border: 4px solid #fff; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        }
-        .logo-header h1 { font-size: 1.5rem; color: var(--primary-blue); margin: 10px 0 5px; }
-        .logo-header p { color: var(--accent-pink); font-size: 0.85rem; font-weight: bold; margin: 0; }
+/* แสดงรหัสผ่านมุมขวาบน */
+.user-badge {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #4aa3ff;
+    border: 1px solid rgba(74, 163, 255, 0.3);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+}
 
-        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
-        .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #f8bbd0; }
-        td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.8rem; vertical-align: middle; }
+/* แถบแจ้งวันใช้งานคงเหลือ */
+.expiry-info {
+    background: #fff; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
+    color: #1565c0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 10px 0; display: inline-block; border: 1px solid #bbdefb;
+}
+.expiry-urgent { color: #ff5252; border-color: #ff5252; animation: blink 1.5s infinite; }
+@keyframes blink { 50% { opacity: 0.7; } }
 
-        .add-day-box { 
-            display: none; 
-            background: var(--soft-purple); 
-            padding: 10px; 
-            border-radius: 12px; 
-            margin-top: 8px; 
-            border: 1px dashed #ce93d8;
-            animation: slideDown 0.3s ease-out;
-        }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.card { background: #fff; border-radius: 15px; padding: 1rem; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
+input#inputNumber { width: 85%; padding: 10px; font-size: 1.2rem; text-align: center; border-radius: 12px; border: 2px solid #f0f4f8; outline: none; }
+.radio-group { display: flex; justify-content: center; gap: 15px; margin: 10px 0; font-size: 0.85rem; }
+button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; transition: 0.2s; }
+.reset { background: #ff6b6b; color: white; width: 100%; padding: 10px; font-size: 0.9rem; }
+#logoutBtn { background: #90a4ae; color: white; padding: 6px 15px; font-size: 0.75rem; margin-bottom: 10px; }
 
-        .input-mini { width: 70px; padding: 6px; border-radius: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; }
-        .confirm-mini-btn { background: #ab47bc; color: white; padding: 6px 12px; font-size: 0.7rem; border-radius: 8px; margin-left: 5px; }
+/* โซนแสดงผล */
+.result-section { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.section { background: #fff; border-radius: 12px; padding: 0.8rem; text-align: center; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
+.section:active { transform: scale(0.95); }
+.section.full { grid-column: span 2; }
+.section strong { display: block; margin-bottom: 5px; color: #ff7ab6; font-size: 0.75rem; border-bottom: 1px solid #fdf2f8; padding-bottom: 4px; }
+.result { font-family: 'Consolas', monospace; font-size: 0.85rem; color: #444; line-height: 1.4; word-break: break-all; }
 
-        button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
-        button:active { transform: scale(0.95); }
-        
-        .plus-btn { background: #4caf50; color: white; font-size: 0.75rem; padding: 6px 10px; }
-        .perm-btn { background: #7b1fa2; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
-        .del-btn { background: #e53935; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
-        
-        .kick-btn { background: #ffb74d; color: white; }
-        .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
-        .unban-btn { background: #40c4ff; color: white; width: 100%; }
-        
-        .add-btn { background: var(--primary-blue); color: white; padding: 12px 15px; border-radius: 12px; flex: 1; }
-        .add-perm-btn { background: #e91e63; color: white; padding: 12px 15px; border-radius: 12px; flex: 1; }
-        .login-btn { background: linear-gradient(90deg, #2196f3, #ff4081); color: white; width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 15px; }
+/* Overlay ต่างๆ */
+#kickAlert, #banOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.alert-box { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; text-align: center; width: 100%; max-width: 300px; border: 5px solid #ff7ab6; }
 
-        .code-badge { font-size: 0.7rem; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #eee; font-weight: bold; background: #fff; color: #bbb;}
-        .code-badge.active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
-        .code-status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; margin: 10px 0; max-height: 150px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
-        
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-        .online { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); }
-        .offline { background: #cfd8dc; }
+#loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #ffe4f0 0%, #d0f0ff 100%); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.login-card { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+.login-btn { width: 100%; padding: 14px; border-radius: 15px; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); color: white; font-size: 1.1rem; margin-top: 15px; }
 
-        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
-        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; }
-        
-        .expired-text { color: #ff5252; font-weight: bold; }
-        .valid-text { color: #2e7d32; font-weight: bold; }
-        .perm-text { color: #7b1fa2; font-weight: bold; }
-        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
-    </style>
+.dot { height: 9px; width: 9px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.online { background: #4caf50; box-shadow: 0 0 5px #4caf50; } 
+.offline { background: #f44336; }
+</style>
 </head>
 <body>
 
+<div id="currentUserBadge" class="user-badge" style="display:none;"></div>
+
+<div id="banOverlay">
+    <div class="alert-box">
+        <h1 style="font-size: 3.5rem; margin: 0;">🛸</h1>
+        <p style="font-weight: bold; font-size: 1.2rem; color: #ff5252; line-height: 1.6; margin: 20px 0;">
+            คุณโดนแบน<br>กรุณาติดต่อแอดมินเพื่อต่ออายุการใช้งาน
+        </p>
+        <h1 style="font-size: 3.5rem; margin: 0;">🚀</h1>
+    </div>
+</div>
+
+<div id="kickAlert">
+    <div class="alert-box">
+        <h2 style="color: #ff6b6b; margin-top:0;">⚠️ เตือน!</h2>
+        <p id="kickMsg" style="font-weight: bold; font-size: 1.1rem; color: #333;">❗ไม่เข้าซ้อนกันนะจ้ะ อิอิ❗</p>
+        <button onclick="location.reload()" style="background: #4aa3ff; color: white; width: 100%; padding: 15px; font-size: 1rem; border-radius:15px;">ตกลง</button>
+    </div>
+</div>
+
 <div id="loginOverlay">
     <div class="login-card">
-        <div class="logo-header">
-            <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-            <h2>Admin Login</h2>
-        </div>
-        <input id="userPass" type="password" placeholder="ใส่รหัสผ่านแอดมิน">
+        <h2 style="margin-bottom: 1.5rem; color: #4aa3ff; font-size: 1.6rem; text-transform: lowercase;">lnwwinlek</h2>
+        <input id="userName" placeholder="ชื่อผู้เล่น" style="width:90%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #ddd; outline:none; text-align:center;">
+        <input id="userPass" type="password" placeholder="รหัสผ่าน" style="width:90%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #ddd; outline:none; text-align:center;">
         <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
     </div>
 </div>
 
 <div id="main" class="container" style="display:none;">
-    <div class="logo-header">
-        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-        <h1>แผงควบคุมแอดมิน</h1>
-        <p>🌟 LEKWIN JUNIOR SYSTEM 🌟</p>
-    </div>
+    <header>
+        <h1 style="text-transform: lowercase;">lnwwinlek</h1>
+        <p>วินเลขโดย 🌟เทพวินเลข🌟</p>
+        <div id="expiryStatus" class="expiry-info">⏳ เช็คอายุการใช้งาน...</div>
+        <br>
+        <button id="logoutBtn" onclick="doLogout()">ออกจากระบบ</button>
+    </header>
 
-    <div class="card">
-        <h3 style="color: var(--primary-blue);">✨ สร้างและต่ออายุรหัส</h3>
-        <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
-            <input id="newCodeInput" type="text" placeholder="ชื่อรหัสใหม่..." style="flex: 2; min-width: 150px; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
-            <button class="add-btn" onclick="addNewCode(false)">➕ สร้าง (30วัน)</button>
-            <button class="add-perm-btn" onclick="addNewCode(true)">♾️ สร้างรหัสถาวร</button>
-        </div>
-        
-        <div class="table-wrapper" style="max-height: 450px;">
-            <table>
-                <thead>
-                    <tr><th>ชื่อรหัส</th><th>วันหมดอายุ / สถานะ</th><th align="right">จัดการ</th></tr>
-                </thead>
-                <tbody id="customCodeTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3 style="color:#2e7d32;"><span class="dot online"></span> ยูสเซอร์ที่กำลังเล่น</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>ชื่อ</th><th>รหัส</th><th>สถานะ</th><th>จัดการ</th></tr>
-                </thead>
+    <div id="adminPanel" style="display:none;">
+        <div class="card" style="text-align: left;">
+            <h4 style="margin:0 0 10px 0; color:#4aa3ff;">👥 รายชื่อออนไลน์ (Real-time)</h4>
+            <table style="width:100%; font-size:0.75rem; border-collapse: collapse;">
                 <tbody id="onlineListTableBody"></tbody>
             </table>
         </div>
     </div>
 
-    <button id="logoutBtn" onclick="doLogout()">ออกจากระบบแอดมิน</button>
+    <div id="userPanel" style="display:none;">
+        <div class="card">
+            <input id="inputNumber" type="tel" placeholder="กรอกเลขที่นี่">
+            <div class="radio-group">
+                <label><input type="radio" name="mode" value="withReverse" checked onchange="updateOutput()"> กลับเลข</label>
+                <label><input type="radio" name="mode" value="noReverse" onchange="updateOutput()"> ไม่กลับเลข</label>
+            </div>
+            <button class="reset" onclick="resetAll()">ล้างข้อมูล</button>
+        </div>
+        <div id="output" class="result-section"></div>
+        
+        <div style="margin-top: 25px; border-top: 2px dashed #ff7ab6; padding-top: 15px;">
+            <h3 style="font-size: 1rem; color: #ff7ab6; margin-bottom: 10px;">🪜 ชุดเลขสำเร็จรูป</h3>
+            <div class="result-section">
+                <div class="section full" onclick="copyOnly('01 12 23 34 45 56 67 78 89 90')"><strong>เลขพี่น้อง (01-90)</strong><div class="result">01 12 23 34 45 56 67 78 89 90</div></div>
+                <div class="section" onclick="copyOnly('012 123 234 345 456 567 678 789 890 901')"><strong>เรียง</strong><div class="result">012 123 234...</div></div>
+                <div class="section" onclick="copyOnly('001 112 221 331 441 551 661 771 881 991 002 113 223 332 442 552 662 772 882 992 003 114 224 334 443 553 663 773 883 993 004 115 225 335 445 554 664 774 884 994 005 116 226 336 446 556 665 775 885 995 006 117 227 337 447 557 667 776 886 996 007 118 228 338 448 558 668 778 887 997 008 119 229 339 449 559 669 779 889 998 009 110 220 330 440 550 660 770 880 990')"><strong>เบิ้ลหน้า</strong><div class="result">001 112 221...</div></div>
+                <div class="section" onclick="copyOnly('100 211 122 133 144 155 166 177 188 199 200 311 322 233 244 255 266 277 288 299 300 411 422 433 344 355 366 377 388 399 400 511 522 533 544 455 466 477 488 499 500 611 622 633 644 655 566 577 588 599 600 711 722 733 744 755 766 677 688 699 700 811 822 833 844 855 866 877 788 799 800 911 922 933 944 955 966 977 988 899 900 011 022 033 044 055 066 077 088 099')"><strong>เบิ้ลหลัง</strong><div class="result">100 211 122...</div></div>
+                <div class="section" onclick="copyOnly('010 121 212 313 414 515 616 717 818 919 020 131 232 323 424 525 626 727 828 929 030 141 242 343 434 535 636 737 838 939 040 151 252 353 454 545 646 747 848 949 050 161 262 363 464 565 656 757 858 959 060 171 272 373 474 575 676 767 868 969 070 181 282 383 484 585 686 787 878 979 080 191 292 393 494 595 696 797 898 989 090 101 202 303 404 505 606 707 808 909')"><strong>ชุดหาม</strong><div class="result">010 121 212...</div></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-// --- CONFIG FIREBASE ---
-const firebaseConfig = {
-    apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
-    authDomain: "junior-nior.firebaseapp.com",
-    databaseURL: "https://junior-nior-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "junior-nior",
-    storageBucket: "junior-nior.firebasestorage.app",
-    messagingSenderId: "225309280850",
-    appId: "1:225309280850:web:49e3f857eb8a4a250a2d8b"
-};
+const firebaseConfig = { apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY", authDomain: "junior-nior.firebaseapp.com", databaseURL: "https://junior-nior-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "junior-nior", storageBucket: "junior-nior.firebasestorage.app", messagingSenderId: "225309280850", appId: "1:225309280850:web:49e3f857eb8a4a250a2d8b" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000; // ค่าสำหรับสถานะถาวร
+const ADMIN_PASS = "adminwinjunior";
+const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
-function doLogin() {
-    const p = document.getElementById("userPass").value;
-    if(p === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); }
-    else { alert("รหัสผ่านไม่ถูกต้อง!"); }
+function getDeviceId() { let id = localStorage.getItem('lekwin_dev_id'); if (!id) { id = 'ID-' + Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('lekwin_dev_id', id); } return id; }
+const MY_DEVICE_ID = getDeviceId();
+
+// เช็คแบนแบบ Real-time
+db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
+    if(snap.exists()) {
+        document.getElementById("banOverlay").style.display = "flex";
+        document.getElementById("currentUserBadge").style.display = "none";
+        sessionStorage.clear();
+    } else {
+        document.getElementById("banOverlay").style.display = "none";
+    }
+});
+
+function showRemainingDays(expireAt) {
+    const statusEl = document.getElementById("expiryStatus");
+    if(!expireAt) { statusEl.innerHTML = "♾️ รหัสถาวร"; return; }
+    const diff = expireAt - Date.now();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if(days <= 0) {
+        statusEl.innerHTML = "❌ หมดอายุแล้ว";
+        statusEl.classList.add("expiry-urgent");
+    } else {
+        statusEl.innerHTML = `📅 เหลือใช้งาน: ${days} วัน`;
+        if(days <= 3) statusEl.classList.add("expiry-urgent");
+        else statusEl.classList.remove("expiry-urgent");
+    }
 }
 
-function doLogout() { sessionStorage.clear(); location.reload(); }
+async function doLogin() {
+    const name = document.getElementById("userName").value.trim();
+    const pass = document.getElementById("userPass").value.trim();
+    if(!name || !pass) return;
 
-function checkAuth() {
-    if(sessionStorage.getItem("isAdminActive") === "true") {
+    const banSnap = await db.ref('blacklist/' + MY_DEVICE_ID).once('value');
+    if(banSnap.exists()) return;
+
+    const isAdmin = (pass === ADMIN_PASS);
+    let isValidUser = USER_CODES.includes(pass);
+    let expireAt = null;
+
+    if(!isAdmin && !isValidUser) { 
+        const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
+        if(customSnap.exists()) {
+            const data = customSnap.val();
+            if(Date.now() > data.expireAt) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
+            isValidUser = true; expireAt = data.expireAt;
+        }
+    }
+
+    if(isAdmin || isValidUser) {
+        const sessionId = Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+        db.ref('online_users/' + pass).set({ 
+            name, pass, sessionId, deviceId: MY_DEVICE_ID, status: "online", lastActive: Date.now() 
+        }).then(() => {
+            sessionStorage.setItem("sessionId", sessionId);
+            sessionStorage.setItem("myPass", pass);
+            sessionStorage.setItem("isAdmin", isAdmin ? "1" : "0");
+            location.reload();
+        });
+    } else { alert("รหัสผิดจ้ะ"); }
+}
+
+function doLogout() {
+    const p = sessionStorage.getItem("myPass");
+    if(p) db.ref('online_users/' + p).remove();
+    sessionStorage.clear();
+    location.reload();
+}
+
+window.onload = () => {
+    const myPass = sessionStorage.getItem("myPass");
+    const mySid = sessionStorage.getItem("sessionId");
+    
+    if(mySid && myPass){
         document.getElementById("loginOverlay").style.display = "none";
         document.getElementById("main").style.display = "block";
-        loadData();
-    }
-}
+        
+        // แสดงรหัสผ่านที่มุมขวาบน
+        const badge = document.getElementById("currentUserBadge");
+        badge.innerText = "🔑 " + myPass;
+        badge.style.display = "block";
+        
+        function setOnlineStatus(isOnline) {
+            db.ref('online_users/' + myPass).update({ 
+                status: isOnline ? "online" : "offline", 
+                lastActive: Date.now() 
+            });
+        }
 
-function loadData() {
-    db.ref().on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        const custom = data.custom_codes || {};
-        const online = data.online_users || {};
+        setOnlineStatus(true);
+        document.addEventListener("visibilitychange", () => {
+            setOnlineStatus(document.visibilityState === 'visible');
+        });
+        window.addEventListener("beforeunload", () => {
+            setOnlineStatus(false);
+        });
+        db.ref('online_users/' + myPass).onDisconnect().update({ status: "offline" });
 
-        // 1. แสดงตารางรหัสทั้งหมด
-        const customTbody = document.getElementById("customCodeTableBody");
-        customTbody.innerHTML = "";
-        Object.keys(custom).sort().forEach(code => {
-            const expTime = custom[code].expireAt;
-            const isPerm = expTime >= PERM_VAL;
-            const diff = expTime - Date.now();
-            const isExpired = !isPerm && diff <= 0;
-            
-            let statusHtml = "";
-            if(isPerm) {
-                statusHtml = `<div class="perm-text">♾️ถาวร♾️</div>`;
-            } else {
-                const dayLeft = Math.ceil(diff/(1000*60*60*24));
-                statusHtml = `
-                    <div class="${isExpired ? 'expired-text' : 'valid-text'}">${new Date(expTime).toLocaleDateString('th-TH')}</div>
-                    <div style="font-size:0.7rem; color:#666;">${isExpired ? 'หมดอายุแล้ว' : 'เหลือ '+dayLeft+' วัน'}</div>`;
+        if(sessionStorage.getItem("isAdmin") === "1") {
+            document.getElementById("adminPanel").style.display = "block";
+            db.ref('online_users').on('value', (snapshot) => {
+                const users = snapshot.val() ? Object.values(snapshot.val()) : [];
+                const tbody = document.getElementById("onlineListTableBody");
+                tbody.innerHTML = "";
+                users.forEach(u => { 
+                    tbody.innerHTML += `<tr><td style="padding:5px;"><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span> ${u.name} (${u.pass})</td></tr>`; 
+                });
+            });
+        } else { document.getElementById("userPanel").style.display = "block"; }
+
+        db.ref('custom_codes/' + myPass).on('value', (snap) => {
+            if(snap.exists()){
+                const data = snap.val();
+                showRemainingDays(data.expireAt);
+                if(Date.now() > data.expireAt) {
+                    document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
+                    document.getElementById("kickAlert").style.display = "flex";
+                }
+            } else if(USER_CODES.includes(myPass)) { showRemainingDays(null); }
+        });
+
+        db.ref('online_users/' + myPass).on('value', (snap) => {
+            const data = snap.val();
+            if(!data || data.sessionId !== mySid) {
+                sessionStorage.clear();
+                document.getElementById("kickAlert").style.display = "flex";
             }
-
-            customTbody.innerHTML += `
-                <tr>
-                    <td><strong>${code}</strong></td>
-                    <td>
-                        ${statusHtml}
-                        <div id="box-${code}" class="add-day-box">
-                             <input type="number" id="input-${code}" class="input-mini" value="30">
-                             <button class="confirm-mini-btn" onclick="saveNewDays('${code}')">ตกลง</button>
-                        </div>
-                    </td>
-                    <td align="right">
-                        <button class="plus-btn" onclick="toggleAddDay('${code}')">➕ต่ออายุ</button>
-                        <button class="perm-btn" style="background:${isPerm ? '#9e9e9e':'#7b1fa2'}" onclick="togglePermanent('${code}', ${isPerm})">
-                            ${isPerm ? '🔓ยกเลิก' : '♾️ถาวร'}
-                        </button>
-                        <button class="del-btn" onclick="deleteCode('${code}')">❗ลบ</button>
-                    </td>
-                </tr>`;
         });
+    }
+};
 
-        // 2. แสดงตารางคนออนไลน์
-        const onlineTbody = document.getElementById("onlineListTableBody");
-        onlineTbody.innerHTML = "";
-        Object.keys(online).forEach(key => {
-            const u = online[key];
-            onlineTbody.innerHTML += `
-                <tr>
-                    <td><strong>${u.name || 'N/A'}</strong></td>
-                    <td>${u.pass || key}</td>
-                    <td><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span></td>
-                    <td><button class="kick-btn" onclick="kickUser('${key}')">เตะ</button></td>
-                </tr>`;
-        });
-    });
+// ฟังก์ชันคำนวณเลข
+function cleanInput(i){return i.replace(/[^0-9]/g,'');}
+function genWithRev(d,l,a){let r=new Set();function h(p){if(p.length===l){if(!a&&new Set(p).size<l)return;r.add(p.join(''));return;}for(let d0 of d){p.push(d0);h(p);p.pop();}}h([]);return [...r];}
+function genNoRev(d,l,a){let r=[];function h(p,s){if(p.length===l){if(!a&&new Set(p).size<l)return;r.push(p.join(''));return;}for(let i=s;i<d.length;i++){p.push(d[i]);h(p,i);p.pop();}}h([],0);return r;}
+function filterT(n){return n.filter(x=>!(x[0]==x[1]&&x[1]==x[2]));}
+function removeD(n){let s=new Set(),r=[];n.forEach(x=>{let y=x.split('').reverse().join('');if(!s.has(x)&&!s.has(y)){s.add(x);s.add(y);r.push(x);}});return r;}
+function copyOnly(t) { 
+    const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); 
+    const hint = document.createElement('div');
+    hint.innerHTML = "ก๊อปปี้แล้วจ้า!"; hint.style = "position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:#fff; padding:12px 25px; border-radius:30px; z-index:2001; font-weight:bold;";
+    document.body.appendChild(hint); setTimeout(()=>document.body.removeChild(hint), 800);
 }
-
-// --- ฟังก์ชันการจัดการ ---
-
-window.deleteCode = (code) => { 
-    if(confirm(`ยืนยันการลบรหัส [${code}]?\nยูสเซอร์จะถูกเตะออกทันที!`)) {
-        // ลบทั้งรหัสและชื่อในรายการออนไลน์เพื่อให้เด้งออก
-        db.ref('custom_codes/' + code).remove(); 
-        db.ref('online_users/' + code).remove(); 
-    }
-};
-
-window.addNewCode = (isPermanent) => {
-    const code = document.getElementById("newCodeInput").value.trim();
-    if(!code) return alert("กรุณาใส่ชื่อรหัส");
-    const exp = isPermanent ? PERM_VAL : Date.now() + (30 * 24 * 60 * 60 * 1000);
-    db.ref('custom_codes/' + code).set({ expireAt: exp, createdAt: Date.now() }).then(() => {
-        document.getElementById("newCodeInput").value = "";
-    });
-};
-
-window.togglePermanent = (code, currentIsPerm) => {
-    let newExp = currentIsPerm ? Date.now() + (30 * 24 * 60 * 60 * 1000) : PERM_VAL;
-    db.ref('custom_codes/' + code).update({ expireAt: newExp });
-};
-
-window.toggleAddDay = (code) => {
-    const box = document.getElementById(`box-${code}`);
-    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-};
-
-window.saveNewDays = (code) => {
-    const days = document.getElementById(`input-${code}`).value;
-    if(days && !isNaN(days)) {
-        const daysInMs = parseInt(days) * 24 * 60 * 60 * 1000;
-        db.ref('custom_codes/' + code).once('value', (snap) => {
-            let currentExp = snap.exists() ? snap.val().expireAt : Date.now();
-            if (currentExp >= PERM_VAL || currentExp < Date.now()) currentExp = Date.now();
-            db.ref('custom_codes/' + code).update({ expireAt: currentExp + daysInMs });
-            document.getElementById(`box-${code}`).style.display = 'none';
-        });
-    }
-};
-
-window.kickUser = (key) => { if(confirm(`เตะยูสเซอร์ [${key}]?`)) db.ref('online_users/' + key).remove(); };
-
-checkAuth();
+function updateOutput(){
+    let input = document.getElementById("inputNumber"); input.value = cleanInput(input.value); let digits = input.value.split(''); let output = document.getElementById("output"); output.innerHTML = ""; if(digits.length < 2) return;
+    let mode = document.querySelector("input[name=mode]:checked").value; let gen = mode === "withReverse" ? genWithRev : genNoRev;
+    let a=gen(digits,2,false), b=gen(digits,2,true), c=gen(digits,3,false), d=gen(digits,3,true), e=filterT(d);
+    if(mode === "noReverse"){ a=removeD(a); b=removeD(b); c=removeD(c); d=removeD(d); e=removeD(e); }
+    output.innerHTML += `<div class="section full" onclick="copyOnly('${[...a, ...c].join(', ')}')"><strong>2+3 ตัว (ไม่รวมเบิ้ล) (${[...a, ...c].length})</strong><div class="result">${[...a, ...c].join(', ')}</div></div>`;
+    output.innerHTML += `<div class="section" onclick="copyOnly('${b.join(', ')}')"><strong>2 ตัว (รวมเบิ้ล) (${b.length})</strong><div class="result">${b.join(', ')}</div></div>`;
+    output.innerHTML += `<div class="section" onclick="copyOnly('${d.join(', ')}')"><strong>3 ตัว (รวมเบิ้ล) (${d.length})</strong><div class="result">${d.join(', ')}</div></div>`;
+    output.innerHTML += `<div class="section full" onclick="copyOnly('${e.join(', ')}')"><strong>3 ตัว (ตัดตอง) (${e.length})</strong><div class="result">${e.join(', ')}</div></div>`;
+}
+document.getElementById("inputNumber").addEventListener("input", updateOutput);
+function resetAll(){ document.getElementById("inputNumber").value = ""; document.getElementById("output").innerHTML = ""; }
 </script>
 </body>
 </html>
