@@ -164,7 +164,7 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
 
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
-    const PERM_THRESHOLD = 30000000000000; // ค่าที่แอดมินใช้ตั้งถาวร (32,xxx,xxx,xxx,xxx)
+    const PERM_THRESHOLD = 3000000000000; // ปรับค่าให้ตรงกับแอดมิน (ปี 2090+)
     
     // ✅ ตรวจสอบว่าเป็นรหัสถาวรหรือไม่
     if(!expireAt || expireAt >= PERM_THRESHOLD) { 
@@ -203,7 +203,7 @@ async function doLogin() {
         if(customSnap.exists()) {
             const data = customSnap.val();
             // เช็คหมดอายุ (ยกเว้นถาวร)
-            if(Date.now() > data.expireAt && data.expireAt < 30000000000000) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
+            if(Date.now() > data.expireAt && data.expireAt < 3000000000000) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
             isValidUser = true; expireAt = data.expireAt;
         }
     }
@@ -274,7 +274,7 @@ window.onload = () => {
                 const data = snap.val();
                 showRemainingDays(data.expireAt);
                 // เช็คดีดออกถ้าหมดอายุ (ยกเว้นถาวร)
-                if(Date.now() > data.expireAt && data.expireAt < 30000000000000) {
+                if(Date.now() > data.expireAt && data.expireAt < 3000000000000) {
                     document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
                     document.getElementById("kickAlert").style.display = "flex";
                 }
