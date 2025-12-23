@@ -162,25 +162,31 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
     }
 });
 
+// ฟังก์ชันแสดงวันใช้งานแบบละเอียด (วัน ชม. นาที)
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
-    const PERM_THRESHOLD = 3000000000000; // ปรับค่าให้ตรงกับแอดมิน (ปี 2090+)
+    const PERM_THRESHOLD = 3000000000000; 
     
-    // ✅ ตรวจสอบว่าเป็นรหัสถาวรหรือไม่
     if(!expireAt || expireAt >= PERM_THRESHOLD) { 
         statusEl.innerHTML = "♾️ถาวร♾️"; 
         statusEl.classList.remove("expiry-urgent");
         return; 
     }
     
-    const diff = expireAt - Date.now();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const now = Date.now();
+    const diff = expireAt - now;
     
-    if(days <= 0) {
+    if(diff <= 0) {
         statusEl.innerHTML = "❌ หมดอายุแล้ว";
         statusEl.classList.add("expiry-urgent");
     } else {
-        statusEl.innerHTML = `📅 เหลือใช้งาน: ${days} วัน`;
+        // คำนวณ วัน ชั่วโมง และนาที
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        statusEl.innerHTML = `📅 เหลือ: ${days} วัน ${hours} ชม. ${mins} นาที`;
+        
         if(days <= 3) statusEl.classList.add("expiry-urgent");
         else statusEl.classList.remove("expiry-urgent");
     }
@@ -202,7 +208,6 @@ async function doLogin() {
         const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
         if(customSnap.exists()) {
             const data = customSnap.val();
-            // เช็คหมดอายุ (ยกเว้นถาวร)
             if(Date.now() > data.expireAt && data.expireAt < 3000000000000) { alert("❌ รหัสหมดอายุแล้ว!"); return; }
             isValidUser = true; expireAt = data.expireAt;
         }
@@ -236,7 +241,6 @@ window.onload = () => {
         document.getElementById("loginOverlay").style.display = "none";
         document.getElementById("main").style.display = "block";
         
-        // แสดงรหัสผ่านที่มุมขวาบน
         const badge = document.getElementById("currentUserBadge");
         badge.innerText = "🔑 " + myPass;
         badge.style.display = "block";
@@ -273,7 +277,6 @@ window.onload = () => {
             if(snap.exists()){
                 const data = snap.val();
                 showRemainingDays(data.expireAt);
-                // เช็คดีดออกถ้าหมดอายุ (ยกเว้นถาวร)
                 if(Date.now() > data.expireAt && data.expireAt < 3000000000000) {
                     document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
                     document.getElementById("kickAlert").style.display = "flex";
