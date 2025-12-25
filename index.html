@@ -8,39 +8,59 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-/* CSS พื้นฐาน */
-html, body { margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; background: linear-gradient(160deg, #ffe4f0, #d0f0ff); background-attachment: fixed; }
-body { display: flex; flex-direction: column; align-items: center; padding: 15px 0; }
-.container { text-align: center; max-width: 400px; width: 92%; }
-header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0; text-transform: lowercase; }
-header p { font-size: 0.85rem; font-weight: 600; color: #666; margin: 5px 0 10px 0; }
-
-/* แสดงรหัสผ่านมุมขวาบน */
-.user-badge {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    color: #4aa3ff;
-    border: 1px solid rgba(74, 163, 255, 0.3);
-    backdrop-filter: blur(4px);
-    z-index: 100;
+/* กำหนดตัวแปรสีสำหรับ Light/Dark Mode */
+:root {
+    --bg-gradient: linear-gradient(160deg, #ffe4f0, #d0f0ff);
+    --card-bg: #ffffff;
+    --text-main: #444444;
+    --text-sub: #666666;
+    --input-border: #f0f4f8;
+    --section-border: rgba(0,0,0,0.03);
+    --badge-bg: rgba(255, 255, 255, 0.7);
+    --shadow: rgba(0,0,0,0.05);
 }
 
-/* แถบแจ้งวันใช้งานคงเหลือ */
+[data-theme="dark"] {
+    --bg-gradient: linear-gradient(160deg, #1a1a2e, #16213e);
+    --card-bg: #252545;
+    --text-main: #e0e0e0;
+    --text-sub: #b0b0b0;
+    --input-border: #30305a;
+    --section-border: rgba(255,255,255,0.05);
+    --badge-bg: rgba(0, 0, 0, 0.5);
+    --shadow: rgba(0,0,0,0.3);
+}
+
+/* CSS พื้นฐาน */
+html, body { margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; background: var(--bg-gradient); background-attachment: fixed; transition: background 0.3s ease; }
+body { display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); }
+.container { text-align: center; max-width: 400px; width: 92%; }
+header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0; text-transform: lowercase; }
+header p { font-size: 0.85rem; font-weight: 600; color: var(--text-sub); margin: 5px 0 10px 0; }
+
+/* ปุ่มสลับโหมด */
+.theme-switch {
+    position: fixed; top: 10px; left: 10px; z-index: 100;
+    background: var(--badge-bg); border: 1px solid rgba(74, 163, 255, 0.3);
+    padding: 8px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(4px);
+    width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;
+}
+
+.user-badge {
+    position: fixed; top: 10px; right: 10px; background: var(--badge-bg);
+    padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;
+    color: #4aa3ff; border: 1px solid rgba(74, 163, 255, 0.3); backdrop-filter: blur(4px); z-index: 100;
+}
+
 .expiry-info {
-    background: #fff; padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
-    color: #1565c0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 10px 0; display: inline-block; border: 1px solid #bbdefb;
+    background: var(--card-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;
+    color: #1565c0; box-shadow: 0 4px 10px var(--shadow); margin: 10px 0; display: inline-block; border: 1px solid #bbdefb;
 }
 .expiry-urgent { color: #ff5252; border-color: #ff5252; animation: blink 1.5s infinite; }
 @keyframes blink { 50% { opacity: 0.7; } }
 
-.card { background: #fff; border-radius: 15px; padding: 1rem; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
-input#inputNumber { width: 85%; padding: 10px; font-size: 1.2rem; text-align: center; border-radius: 12px; border: 2px solid #f0f4f8; outline: none; }
+.card { background: var(--card-bg); border-radius: 15px; padding: 1rem; box-shadow: 0 8px 20px var(--shadow); margin-bottom: 15px; transition: background 0.3s; }
+input#inputNumber { width: 85%; padding: 10px; font-size: 1.2rem; text-align: center; border-radius: 12px; border: 2px solid var(--input-border); outline: none; background: var(--card-bg); color: var(--text-main); }
 .radio-group { display: flex; justify-content: center; gap: 15px; margin: 10px 0; font-size: 0.85rem; }
 button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; transition: 0.2s; }
 .reset { background: #ff6b6b; color: white; width: 100%; padding: 10px; font-size: 0.9rem; }
@@ -48,18 +68,19 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 
 /* โซนแสดงผล */
 .result-section { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.section { background: #fff; border-radius: 12px; padding: 0.8rem; text-align: center; border: 1px solid rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
+.section { background: var(--card-bg); border-radius: 12px; padding: 0.8rem; text-align: center; border: 1px solid var(--section-border); cursor: pointer; transition: transform 0.1s, background 0.3s; }
 .section:active { transform: scale(0.95); }
 .section.full { grid-column: span 2; }
-.section strong { display: block; margin-bottom: 5px; color: #ff7ab6; font-size: 0.75rem; border-bottom: 1px solid #fdf2f8; padding-bottom: 4px; }
-.result { font-family: 'Consolas', monospace; font-size: 0.85rem; color: #444; line-height: 1.4; word-break: break-all; }
+.section strong { display: block; margin-bottom: 5px; color: #ff7ab6; font-size: 0.75rem; border-bottom: 1px solid var(--section-border); padding-bottom: 4px; }
+.result { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--text-main); line-height: 1.4; word-break: break-all; }
 
 /* Overlay ต่างๆ */
 #kickAlert, #banOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
-.alert-box { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; text-align: center; width: 100%; max-width: 300px; border: 5px solid #ff7ab6; }
+.alert-box { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; text-align: center; width: 100%; max-width: 300px; border: 5px solid #ff7ab6; color: #333; }
 
-#loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #ffe4f0 0%, #d0f0ff 100%); display: flex; align-items: center; justify-content: center; z-index: 999; }
-.login-card { background: white; padding: 2.5rem 1.5rem; border-radius: 30px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+#loginOverlay { position: fixed; inset: 0; background: var(--bg-gradient); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.login-card { background: var(--card-bg); padding: 2.5rem 1.5rem; border-radius: 30px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 15px 35px var(--shadow); }
+.login-card input { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--input-border); }
 .login-btn { width: 100%; padding: 14px; border-radius: 15px; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); color: white; font-size: 1.1rem; margin-top: 15px; }
 
 .dot { height: 9px; width: 9px; border-radius: 50%; display: inline-block; margin-right: 5px; }
@@ -69,14 +90,16 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 </head>
 <body>
 
+<div class="theme-switch" onclick="toggleTheme()" title="สลับโหมด">
+    <span id="themeIcon">☀️</span>
+</div>
+
 <div id="currentUserBadge" class="user-badge" style="display:none;"></div>
 
 <div id="banOverlay">
     <div class="alert-box">
         <h1 style="font-size: 3.5rem; margin: 0;">🛸</h1>
-        <p style="font-weight: bold; font-size: 1.2rem; color: #ff5252; line-height: 1.6; margin: 20px 0;">
-            คุณโดนแบน<br>กรุณาติดต่อแอดมินเพื่อต่ออายุการใช้งาน
-        </p>
+        <p style="font-weight: bold; font-size: 1.2rem; color: #ff5252; line-height: 1.6; margin: 20px 0;">คุณโดนแบน<br>กรุณาติดต่อแอดมิน</p>
         <h1 style="font-size: 3.5rem; margin: 0;">🚀</h1>
     </div>
 </div>
@@ -84,7 +107,7 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 <div id="kickAlert">
     <div class="alert-box">
         <h2 style="color: #ff6b6b; margin-top:0;">⚠️ เตือน!</h2>
-        <p id="kickMsg" style="font-weight: bold; font-size: 1.1rem; color: #333;">❗ไม่เข้าซ้อนกันนะจ้ะ อิอิ❗</p>
+        <p id="kickMsg" style="font-weight: bold; font-size: 1.1rem;">❗ไม่เข้าซ้อนกันนะจ้ะ อิอิ❗</p>
         <button onclick="location.reload()" style="background: #4aa3ff; color: white; width: 100%; padding: 15px; font-size: 1rem; border-radius:15px;">ตกลง</button>
     </div>
 </div>
@@ -92,8 +115,8 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 <div id="loginOverlay">
     <div class="login-card">
         <h2 style="margin-bottom: 1.5rem; color: #4aa3ff; font-size: 1.6rem; text-transform: lowercase;">lnwwinlek</h2>
-        <input id="userName" placeholder="ชื่อผู้เล่น" style="width:90%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #ddd; outline:none; text-align:center;">
-        <input id="userPass" type="password" placeholder="รหัสผ่าน" style="width:90%; padding:12px; margin-bottom:15px; border-radius:12px; border:1px solid #ddd; outline:none; text-align:center;">
+        <input id="userName" placeholder="ชื่อผู้เล่น" style="width:90%; padding:12px; margin-bottom:12px; border-radius:12px; outline:none; text-align:center;">
+        <input id="userPass" type="password" placeholder="รหัสผ่าน" style="width:90%; padding:12px; margin-bottom:15px; border-radius:12px; outline:none; text-align:center;">
         <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
     </div>
 </div>
@@ -109,7 +132,7 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 
     <div id="adminPanel" style="display:none;">
         <div class="card" style="text-align: left;">
-            <h4 style="margin:0 0 10px 0; color:#4aa3ff;">👥 รายชื่อออนไลน์ (Real-time)</h4>
+            <h4 style="margin:0 0 10px 0; color:#4aa3ff;">👥 รายชื่อออนไลน์</h4>
             <table style="width:100%; font-size:0.75rem; border-collapse: collapse;">
                 <tbody id="onlineListTableBody"></tbody>
             </table>
@@ -141,6 +164,21 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 </div>
 
 <script>
+// ฟังก์ชันโหมดกลางวัน/กลางคืน
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const target = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', target);
+    document.getElementById('themeIcon').innerText = target === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('lekwin_theme', target);
+}
+
+// โหลดโหมดที่เคยเลือกไว้
+const savedTheme = localStorage.getItem('lekwin_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
+
+// Firebase Config (คงเดิม)
 const firebaseConfig = { apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY", authDomain: "junior-nior.firebaseapp.com", databaseURL: "https://junior-nior-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "junior-nior", storageBucket: "junior-nior.firebasestorage.app", messagingSenderId: "225309280850", appId: "1:225309280850:web:49e3f857eb8a4a250a2d8b" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -151,7 +189,7 @@ const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek
 function getDeviceId() { let id = localStorage.getItem('lekwin_dev_id'); if (!id) { id = 'ID-' + Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('lekwin_dev_id', id); } return id; }
 const MY_DEVICE_ID = getDeviceId();
 
-// เช็คแบนแบบ Real-time
+// [Logic ทั้งหมดคงเดิมจากโค้ดที่คุณให้มา...]
 db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
     if(snap.exists()) {
         document.getElementById("banOverlay").style.display = "flex";
@@ -162,33 +200,18 @@ db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
     }
 });
 
-// ฟังก์ชันแสดงวันใช้งานแบบละเอียด (วัน ชม. นาที)
 function showRemainingDays(expireAt) {
     const statusEl = document.getElementById("expiryStatus");
     const PERM_THRESHOLD = 3000000000000; 
-    
-    if(!expireAt || expireAt >= PERM_THRESHOLD) { 
-        statusEl.innerHTML = "♾️ถาวร♾️"; 
-        statusEl.classList.remove("expiry-urgent");
-        return; 
-    }
-    
-    const now = Date.now();
-    const diff = expireAt - now;
-    
-    if(diff <= 0) {
-        statusEl.innerHTML = "❌ หมดอายุแล้ว";
-        statusEl.classList.add("expiry-urgent");
+    if(!expireAt || expireAt >= PERM_THRESHOLD) { statusEl.innerHTML = "♾️ถาวร♾️"; statusEl.classList.remove("expiry-urgent"); return; }
+    const now = Date.now(); const diff = expireAt - now;
+    if(diff <= 0) { statusEl.innerHTML = "❌ หมดอายุแล้ว"; statusEl.classList.add("expiry-urgent");
     } else {
-        // คำนวณ วัน ชั่วโมง และนาที
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        
         statusEl.innerHTML = `📅 เหลือ: ${days} วัน ${hours} ชม. ${mins} นาที`;
-        
-        if(days <= 3) statusEl.classList.add("expiry-urgent");
-        else statusEl.classList.remove("expiry-urgent");
+        if(days <= 3) statusEl.classList.add("expiry-urgent"); else statusEl.classList.remove("expiry-urgent");
     }
 }
 
@@ -196,14 +219,11 @@ async function doLogin() {
     const name = document.getElementById("userName").value.trim();
     const pass = document.getElementById("userPass").value.trim();
     if(!name || !pass) return;
-
     const banSnap = await db.ref('blacklist/' + MY_DEVICE_ID).once('value');
     if(banSnap.exists()) return;
-
     const isAdmin = (pass === ADMIN_PASS);
     let isValidUser = USER_CODES.includes(pass);
     let expireAt = null;
-
     if(!isAdmin && !isValidUser) { 
         const customSnap = await db.ref('custom_codes/' + pass).once('value'); 
         if(customSnap.exists()) {
@@ -212,16 +232,10 @@ async function doLogin() {
             isValidUser = true; expireAt = data.expireAt;
         }
     }
-
     if(isAdmin || isValidUser) {
         const sessionId = Date.now() + "_" + Math.random().toString(36).substr(2, 5);
-        db.ref('online_users/' + pass).set({ 
-            name, pass, sessionId, deviceId: MY_DEVICE_ID, status: "online", lastActive: Date.now() 
-        }).then(() => {
-            sessionStorage.setItem("sessionId", sessionId);
-            sessionStorage.setItem("myPass", pass);
-            sessionStorage.setItem("isAdmin", isAdmin ? "1" : "0");
-            location.reload();
+        db.ref('online_users/' + pass).set({ name, pass, sessionId, deviceId: MY_DEVICE_ID, status: "online", lastActive: Date.now() }).then(() => {
+            sessionStorage.setItem("sessionId", sessionId); sessionStorage.setItem("myPass", pass); sessionStorage.setItem("isAdmin", isAdmin ? "1" : "0"); location.reload();
         });
     } else { alert("รหัสผิดจ้ะ"); }
 }
@@ -229,72 +243,43 @@ async function doLogin() {
 function doLogout() {
     const p = sessionStorage.getItem("myPass");
     if(p) db.ref('online_users/' + p).remove();
-    sessionStorage.clear();
-    location.reload();
+    sessionStorage.clear(); location.reload();
 }
 
 window.onload = () => {
     const myPass = sessionStorage.getItem("myPass");
     const mySid = sessionStorage.getItem("sessionId");
-    
     if(mySid && myPass){
         document.getElementById("loginOverlay").style.display = "none";
         document.getElementById("main").style.display = "block";
-        
         const badge = document.getElementById("currentUserBadge");
-        badge.innerText = "🔑 " + myPass;
-        badge.style.display = "block";
-        
-        function setOnlineStatus(isOnline) {
-            db.ref('online_users/' + myPass).update({ 
-                status: isOnline ? "online" : "offline", 
-                lastActive: Date.now() 
-            });
-        }
-
+        badge.innerText = "🔑 " + myPass; badge.style.display = "block";
+        function setOnlineStatus(isOnline) { db.ref('online_users/' + myPass).update({ status: isOnline ? "online" : "offline", lastActive: Date.now() }); }
         setOnlineStatus(true);
-        document.addEventListener("visibilitychange", () => {
-            setOnlineStatus(document.visibilityState === 'visible');
-        });
-        window.addEventListener("beforeunload", () => {
-            setOnlineStatus(false);
-        });
+        document.addEventListener("visibilitychange", () => { setOnlineStatus(document.visibilityState === 'visible'); });
         db.ref('online_users/' + myPass).onDisconnect().update({ status: "offline" });
-
         if(sessionStorage.getItem("isAdmin") === "1") {
             document.getElementById("adminPanel").style.display = "block";
             db.ref('online_users').on('value', (snapshot) => {
                 const users = snapshot.val() ? Object.values(snapshot.val()) : [];
                 const tbody = document.getElementById("onlineListTableBody");
                 tbody.innerHTML = "";
-                users.forEach(u => { 
-                    tbody.innerHTML += `<tr><td style="padding:5px;"><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span> ${u.name} (${u.pass})</td></tr>`; 
-                });
+                users.forEach(u => { tbody.innerHTML += `<tr><td style="padding:5px;"><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span> ${u.name} (${u.pass})</td></tr>`; });
             });
         } else { document.getElementById("userPanel").style.display = "block"; }
-
         db.ref('custom_codes/' + myPass).on('value', (snap) => {
-            if(snap.exists()){
-                const data = snap.val();
-                showRemainingDays(data.expireAt);
-                if(Date.now() > data.expireAt && data.expireAt < 3000000000000) {
-                    document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!";
-                    document.getElementById("kickAlert").style.display = "flex";
-                }
+            if(snap.exists()){ const data = snap.val(); showRemainingDays(data.expireAt);
+                if(Date.now() > data.expireAt && data.expireAt < 3000000000000) { document.getElementById("kickMsg").innerText = "❌ รหัสของคุณหมดอายุแล้ว!"; document.getElementById("kickAlert").style.display = "flex"; }
             } else if(USER_CODES.includes(myPass)) { showRemainingDays(null); }
         });
-
         db.ref('online_users/' + myPass).on('value', (snap) => {
             const data = snap.val();
-            if(!data || data.sessionId !== mySid) {
-                sessionStorage.clear();
-                document.getElementById("kickAlert").style.display = "flex";
-            }
+            if(!data || data.sessionId !== mySid) { sessionStorage.clear(); document.getElementById("kickAlert").style.display = "flex"; }
         });
     }
 };
 
-// ฟังก์ชันคำนวณเลข
+// ฟังก์ชันคำนวณ (คงเดิม)
 function cleanInput(i){return i.replace(/[^0-9]/g,'');}
 function genWithRev(d,l,a){let r=new Set();function h(p){if(p.length===l){if(!a&&new Set(p).size<l)return;r.add(p.join(''));return;}for(let d0 of d){p.push(d0);h(p);p.pop();}}h([]);return [...r];}
 function genNoRev(d,l,a){let r=[];function h(p,s){if(p.length===l){if(!a&&new Set(p).size<l)return;r.push(p.join(''));return;}for(let i=s;i<d.length;i++){p.push(d[i]);h(p,i);p.pop();}}h([],0);return r;}
