@@ -32,7 +32,11 @@
 }
 
 /* CSS พื้นฐาน */
-html, body { margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; background: var(--bg-gradient); background-attachment: fixed; transition: background 0.3s ease; }
+html, body { 
+    margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", sans-serif; 
+    background: var(--bg-gradient); background-attachment: fixed; transition: background 0.3s ease;
+    -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; 
+}
 body { display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); }
 .container { text-align: center; max-width: 400px; width: 92%; }
 header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #4aa3ff, #ff7ab6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0; text-transform: lowercase; }
@@ -88,7 +92,7 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 .offline { background: #f44336; }
 </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div class="theme-switch" onclick="toggleTheme()" title="สลับโหมด">
     <span id="themeIcon">☀️</span>
@@ -164,6 +168,37 @@ button { cursor: pointer; border: none; font-weight: 600; border-radius: 10px; t
 </div>
 
 <script>
+// --- ส่วนป้องกันระดับสูง (Anti-Inspect & View Source) ---
+window.addEventListener('keydown', function(e) {
+    // ดักจับ Ctrl + U
+    if ((e.ctrlKey || e.metaKey) && (e.keyCode === 85 || e.key === 'u')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    // ดักจับ F12
+    if (e.keyCode === 123 || e.key === 'F12') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    // ดักจับ Ctrl + Shift + I/J/C
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+    // ดักจับ Ctrl + S
+    if ((e.ctrlKey || e.metaKey) && (e.keyCode === 83 || e.key === 's')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+}, true);
+
+// ป้องกันคลิกขวาแบบสมบูรณ์
+document.addEventListener('contextmenu', e => e.preventDefault());
+
 // ฟังก์ชันโหมดกลางวัน/กลางคืน
 function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
@@ -173,12 +208,11 @@ function toggleTheme() {
     localStorage.setItem('lekwin_theme', target);
 }
 
-// โหลดโหมดที่เคยเลือกไว้
 const savedTheme = localStorage.getItem('lekwin_theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
 
-// Firebase Config (คงเดิม)
+// Firebase Config
 const firebaseConfig = { apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY", authDomain: "junior-nior.firebaseapp.com", databaseURL: "https://junior-nior-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "junior-nior", storageBucket: "junior-nior.firebasestorage.app", messagingSenderId: "225309280850", appId: "1:225309280850:web:49e3f857eb8a4a250a2d8b" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -189,7 +223,6 @@ const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek
 function getDeviceId() { let id = localStorage.getItem('lekwin_dev_id'); if (!id) { id = 'ID-' + Math.random().toString(36).substr(2, 6).toUpperCase(); localStorage.setItem('lekwin_dev_id', id); } return id; }
 const MY_DEVICE_ID = getDeviceId();
 
-// [Logic ทั้งหมดคงเดิมจากโค้ดที่คุณให้มา...]
 db.ref('blacklist/' + MY_DEVICE_ID).on('value', (snap) => {
     if(snap.exists()) {
         document.getElementById("banOverlay").style.display = "flex";
@@ -279,7 +312,7 @@ window.onload = () => {
     }
 };
 
-// ฟังก์ชันคำนวณ (คงเดิม)
+// ฟังก์ชันคำนวณ
 function cleanInput(i){return i.replace(/[^0-9]/g,'');}
 function genWithRev(d,l,a){let r=new Set();function h(p){if(p.length===l){if(!a&&new Set(p).size<l)return;r.add(p.join(''));return;}for(let d0 of d){p.push(d0);h(p);p.pop();}}h([]);return [...r];}
 function genNoRev(d,l,a){let r=[];function h(p,s){if(p.length===l){if(!a&&new Set(p).size<l)return;r.push(p.join(''));return;}for(let i=s;i<d.length;i++){p.push(d[i]);h(p,i);p.pop();}}h([],0);return r;}
